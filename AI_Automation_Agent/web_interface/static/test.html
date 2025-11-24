@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>JavaScript Test</title>
+</head>
+<body>
+    <h1>JavaScript Loading Test</h1>
+    <div id="results"></div>
+    
+    <script src="/static/js/utils.js"></script>
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/websocket.js"></script>
+    <script src="/static/js/components.js"></script>
+    
+    <script>
+        console.log('Starting tests...');
+        
+        const results = document.getElementById('results');
+        let testResults = [];
+        
+        // Test 1: Check if Utils is available
+        if (typeof Utils !== 'undefined') {
+            testResults.push('✅ Utils is available');
+        } else {
+            testResults.push('❌ Utils is NOT available');
+        }
+        
+        // Test 2: Check if API is available
+        if (typeof API !== 'undefined') {
+            testResults.push('✅ API is available');
+        } else {
+            testResults.push('❌ API is NOT available');
+        }
+        
+        // Test 3: Check if WebSocketManager is available
+        if (typeof WebSocketManager !== 'undefined') {
+            testResults.push('✅ WebSocketManager is available');
+        } else {
+            testResults.push('❌ WebSocketManager is NOT available');
+        }
+        
+        // Test 4: Check if ToastManager is available
+        if (typeof ToastManager !== 'undefined') {
+            testResults.push('✅ ToastManager is available');
+        } else {
+            testResults.push('❌ ToastManager is NOT available');
+        }
+        
+        // Display results
+        results.innerHTML = testResults.join('<br>');
+        console.log('Test results:', testResults);
+    </script>
+</body>
+</html>

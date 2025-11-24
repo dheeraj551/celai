@@ -1,0 +1,755 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics - AI Automation Agent{% endblock %}
+
+{% block page_title %}Analytics & Reports{% endblock %}
+{% block page_description %}Monitor performance metrics, engagement analytics, and SEO scores{% endblock %}
+
+{% block content %}
+<div class="analytics-container">
+    <!-- Analytics Header -->
+    <div class="analytics-header">
+        <div class="period-selector">
+            <label>Time Period:</label>
+            <select id="periodSelector">
+                <option value="7">Last 7 days</option>
+                <option value="30" selected>Last 30 days</option>
+                <option value="90">Last 90 days</option>
+                <option value="365">Last year</option>
+            </select>
+        </div>
+        <div class="analytics-actions">
+            <button class="btn btn-primary" id="generateReport">
+                <i class="fas fa-file-alt"></i> Generate Report
+            </button>
+            <button class="btn btn-secondary" id="exportData">
+                <i class="fas fa-download"></i> Export Data
+            </button>
+            <button class="btn btn-info" id="refreshAnalytics">
+                <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+        </div>
+    </div>
+
+    <!-- Key Performance Indicators -->
+    <div class="kpi-grid">
+        <div class="kpi-card">
+            <div class="kpi-icon">
+                <i class="fas fa-blog"></i>
+            </div>
+            <div class="kpi-content">
+                <div class="kpi-value" id="kpiTotalPosts">--</div>
+                <div class="kpi-label">Total Posts</div>
+                <div class="kpi-change" id="kpiPostsChange">--</div>
+            </div>
+        </div>
+        
+        <div class="kpi-card">
+            <div class="kpi-icon">
+                <i class="fas fa-eye"></i>
+            </div>
+            <div class="kpi-content">
+                <div class="kpi-value" id="kpiTotalViews">--</div>
+                <div class="kpi-label">Total Views</div>
+                <div class="kpi-change" id="kpiViewsChange">--</div>
+            </div>
+        </div>
+        
+        <div class="kpi-card">
+            <div class="kpi-icon">
+                <i class="fas fa-heart"></i>
+            </div>
+            <div class="kpi-content">
+                <div class="kpi-value" id="kpiEngagement">--</div>
+                <div class="kpi-label">Avg Engagement</div>
+                <div class="kpi-change" id="kpiEngagementChange">--</div>
+            </div>
+        </div>
+        
+        <div class="kpi-card">
+            <div class="kpi-icon">
+                <i class="fas fa-star"></i>
+            </div>
+            <div class="kpi-content">
+                <div class="kpi-value" id="kpiSeoScore">--</div>
+                <div class="kpi-label">Avg SEO Score</div>
+                <div class="kpi-change" id="kpiSeoChange">--</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Grid -->
+    <div class="charts-grid">
+        <!-- Performance Chart -->
+        <div class="chart-card">
+            <div class="chart-header">
+                <h3><i class="fas fa-chart-line"></i> Performance Overview</h3>
+                <div class="chart-controls">
+                    <select id="performanceMetric">
+                        <option value="views">Views</option>
+                        <option value="engagement">Engagement</option>
+                        <option value="posts">Posts</option>
+                    </select>
+                </div>
+            </div>
+            <div class="chart-content">
+                <canvas id="performanceChart" height="300"></canvas>
+            </div>
+        </div>
+
+        <!-- Platform Breakdown -->
+        <div class="chart-card">
+            <div class="chart-header">
+                <h3><i class="fas fa-share-alt"></i> Platform Performance</h3>
+            </div>
+            <div class="chart-content">
+                <canvas id="platformChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Analytics Grid -->
+    <div class="analytics-grid">
+        <!-- Top Performing Posts -->
+        <div class="analytics-section">
+            <div class="section-header">
+                <h3><i class="fas fa-trophy"></i> Top Performing Posts</h3>
+                <button class="btn btn-sm btn-secondary" id="viewAllPosts">View All</button>
+            </div>
+            <div class="section-content">
+                <div class="posts-list" id="topPostsList">
+                    <div class="post-item loading">
+                        <div class="post-loading">Loading top posts...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SEO Performance -->
+        <div class="analytics-section">
+            <div class="section-header">
+                <h3><i class="fas fa-search"></i> SEO Performance</h3>
+                <div class="seo-summary">
+                    <span class="seo-score-large" id="overallSeoScore">--</span>
+                    <span class="seo-label">Overall SEO Score</span>
+                </div>
+            </div>
+            <div class="section-content">
+                <div class="seo-metrics">
+                    <div class="seo-metric">
+                        <div class="metric-label">Readability</div>
+                        <div class="metric-bar">
+                            <div class="metric-fill" id="readabilityBar" style="width: 0%"></div>
+                        </div>
+                        <div class="metric-value" id="readabilityScore">--</div>
+                    </div>
+                    <div class="seo-metric">
+                        <div class="metric-label">Performance</div>
+                        <div class="metric-bar">
+                            <div class="metric-fill" id="performanceBar" style="width: 0%"></div>
+                        </div>
+                        <div class="metric-value" id="performanceScore">--</div>
+                    </div>
+                    <div class="seo-metric">
+                        <div class="metric-label">Accessibility</div>
+                        <div class="metric-bar">
+                            <div class="metric-fill" id="accessibilityBar" style="width: 0%"></div>
+                        </div>
+                        <div class="metric-value" id="accessibilityScore">--</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Trending Topics -->
+        <div class="analytics-section">
+            <div class="section-header">
+                <h3><i class="fas fa-fire"></i> Trending Topics</h3>
+                <button class="btn btn-sm btn-secondary" id="refreshTrending">Refresh</button>
+            </div>
+            <div class="section-content">
+                <div class="trending-topics" id="trendingTopicsList">
+                    <div class="topic-item loading">
+                        <div class="topic-loading">Loading trending topics...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Engagement Metrics -->
+        <div class="analytics-section">
+            <div class="section-header">
+                <h3><i class="fas fa-users"></i> Engagement Metrics</h3>
+            </div>
+            <div class="section-content">
+                <div class="engagement-breakdown">
+                    <div class="engagement-item">
+                        <div class="engagement-icon">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                        <div class="engagement-stats">
+                            <div class="stat-number" id="totalLikes">--</div>
+                            <div class="stat-label">Likes</div>
+                        </div>
+                    </div>
+                    <div class="engagement-item">
+                        <div class="engagement-icon">
+                            <i class="fas fa-share"></i>
+                        </div>
+                        <div class="engagement-stats">
+                            <div class="stat-number" id="totalShares">--</div>
+                            <div class="stat-label">Shares</div>
+                        </div>
+                    </div>
+                    <div class="engagement-item">
+                        <div class="engagement-icon">
+                            <i class="fas fa-comment"></i>
+                        </div>
+                        <div class="engagement-stats">
+                            <div class="stat-number" id="totalComments">--</div>
+                            <div class="stat-label">Comments</div>
+                        </div>
+                    </div>
+                    <div class="engagement-item">
+                        <div class="engagement-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="engagement-stats">
+                            <div class="stat-number" id="avgTimeSpent">--</div>
+                            <div class="stat-label">Avg Time</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Reports Section -->
+    <div class="reports-section">
+        <div class="section-header">
+            <h3><i class="fas fa-file-alt"></i> Detailed Reports</h3>
+        </div>
+        <div class="reports-grid">
+            <div class="report-card" onclick="analytics.showReportModal('performance')">
+                <div class="report-icon">
+                    <i class="fas fa-chart-bar"></i>
+                </div>
+                <div class="report-content">
+                    <h4>Performance Report</h4>
+                    <p>Comprehensive analysis of blog performance metrics</p>
+                </div>
+            </div>
+            
+            <div class="report-card" onclick="analytics.showReportModal('seo')">
+                <div class="report-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+                <div class="report-content">
+                    <h4>SEO Analysis</h4>
+                    <p>Detailed SEO performance and optimization recommendations</p>
+                </div>
+            </div>
+            
+            <div class="report-card" onclick="analytics.showReportModal('engagement')">
+                <div class="report-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="report-content">
+                    <h4>Engagement Report</h4>
+                    <p>Audience engagement and interaction analysis</p>
+                </div>
+            </div>
+            
+            <div class="report-card" onclick="analytics.showReportModal('content')">
+                <div class="report-icon">
+                    <i class="fas fa-blog"></i>
+                </div>
+                <div class="report-content">
+                    <h4>Content Analysis</h4>
+                    <p>Content quality and effectiveness evaluation</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Analytics specific JavaScript
+class Analytics {
+    constructor() {
+        this.performanceChart = null;
+        this.platformChart = null;
+        this.currentPeriod = 30;
+        this.initializeEventListeners();
+        this.loadAnalyticsData();
+    }
+
+    initializeEventListeners() {
+        document.getElementById('periodSelector').addEventListener('change', (e) => {
+            this.currentPeriod = parseInt(e.target.value);
+            this.loadAnalyticsData();
+        });
+
+        document.getElementById('performanceMetric').addEventListener('change', (e) => {
+            this.updatePerformanceChart(e.target.value);
+        });
+
+        document.getElementById('refreshAnalytics').addEventListener('click', () => {
+            this.loadAnalyticsData();
+        });
+
+        document.getElementById('refreshTrending').addEventListener('click', () => {
+            this.loadTrendingTopics();
+        });
+
+        document.getElementById('generateReport').addEventListener('click', () => {
+            this.generateReport();
+        });
+
+        document.getElementById('exportData').addEventListener('click', () => {
+            this.exportData();
+        });
+
+        document.getElementById('viewAllPosts').addEventListener('click', () => {
+            window.location.href = '/blog-automation';
+        });
+    }
+
+    async loadAnalyticsData() {
+        try {
+            await Promise.all([
+                this.loadKPIMetrics(),
+                this.loadPerformanceChart(),
+                this.loadPlatformChart(),
+                this.loadTopPosts(),
+                this.loadSEOMetrics(),
+                this.loadTrendingTopics(),
+                this.loadEngagementMetrics()
+            ]);
+        } catch (error) {
+            console.error('Error loading analytics data:', error);
+            this.showToast('Failed to load analytics data', 'error');
+        }
+    }
+
+    async loadKPIMetrics() {
+        try {
+            const response = await API.get(`/api/analytics/summary?days=${this.currentPeriod}`);
+            const summary = response.summary || response.data?.summary;
+            
+            if (summary) {
+                const performance = summary.overall_performance;
+                
+                // Update KPI values
+                document.getElementById('kpiTotalPosts').textContent = performance?.total_posts || 0;
+                document.getElementById('kpiTotalViews').textContent = this.formatNumber(performance?.total_views || 0);
+                document.getElementById('kpiEngagement').textContent = (performance?.average_engagement_rate || 0).toFixed(1) + '%';
+                document.getElementById('kpiSeoScore').textContent = (performance?.average_seo_score || 0).toFixed(0);
+                
+                // Update change indicators (simplified)
+                document.getElementById('kpiPostsChange').textContent = '+12%';
+                document.getElementById('kpiViewsChange').textContent = '+8%';
+                document.getElementById('kpiEngagementChange').textContent = '+3%';
+                document.getElementById('kpiSeoChange').textContent = '+2%';
+            }
+            
+        } catch (error) {
+            console.error('Error loading KPI metrics:', error);
+        }
+    }
+
+    async loadPerformanceChart() {
+        try {
+            // Sample data - in real implementation, this would come from API
+            const chartData = this.generateSampleChartData();
+            
+            const ctx = document.getElementById('performanceChart').getContext('2d');
+            
+            if (this.performanceChart) {
+                this.performanceChart.destroy();
+            }
+            
+            this.performanceChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: chartData.labels,
+                    datasets: [{
+                        label: 'Views',
+                        data: chartData.views,
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }, {
+                        label: 'Engagement Rate (%)',
+                        data: chartData.engagement,
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        tension: 0.4,
+                        yAxisID: 'y1'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    scales: {
+                        x: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Time Period'
+                            }
+                        },
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Views'
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'Engagement Rate (%)'
+                            },
+                            grid: {
+                                drawOnChartArea: false,
+                            },
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    }
+                }
+            });
+            
+        } catch (error) {
+            console.error('Error loading performance chart:', error);
+        }
+    }
+
+    async loadPlatformChart() {
+        try {
+            const response = await API.get(`/api/analytics/summary?days=${this.currentPeriod}`);
+            const platforms = response.summary?.platform_breakdown || response.data?.summary?.platform_breakdown || [];
+            
+            const ctx = document.getElementById('platformChart').getContext('2d');
+            
+            if (this.platformChart) {
+                this.platformChart.destroy();
+            }
+            
+            this.platformChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: platforms.map(p => p.platform),
+                    datasets: [{
+                        data: platforms.map(p => p.total_views),
+                        backgroundColor: [
+                            '#3b82f6',
+                            '#10b981',
+                            '#f59e0b',
+                            '#ef4444',
+                            '#8b5cf6'
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        }
+                    }
+                }
+            });
+            
+        } catch (error) {
+            console.error('Error loading platform chart:', error);
+        }
+    }
+
+    async loadTopPosts() {
+        try {
+            const response = await API.get(`/api/analytics/summary?days=${this.currentPeriod}`);
+            const posts = response.summary?.top_performing_posts || response.data?.summary?.top_performing_posts || [];
+            
+            const container = document.getElementById('topPostsList');
+            
+            if (posts.length === 0) {
+                container.innerHTML = '<div class="no-data">No posts found for this period</div>';
+                return;
+            }
+            
+            container.innerHTML = posts.slice(0, 5).map(post => `
+                <div class="post-item">
+                    <div class="post-rank">#${posts.indexOf(post) + 1}</div>
+                    <div class="post-content">
+                        <div class="post-title">${this.truncateText(post.title, 40)}</div>
+                        <div class="post-platform">${post.platform}</div>
+                        <div class="post-metrics">
+                            <span class="metric">${this.formatNumber(post.views)} views</span>
+                            <span class="metric">${post.engagement_rate}% engagement</span>
+                            <span class="metric">${post.seo_score}/100 SEO</span>
+                        </div>
+                    </div>
+                    <div class="post-chart">
+                        <div class="mini-chart" style="height: 40px;">
+                            <div class="chart-bar" style="height: ${(post.views / Math.max(...posts.map(p => p.views))) * 100}%"></div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+        } catch (error) {
+            console.error('Error loading top posts:', error);
+        }
+    }
+
+    async loadSEOMetrics() {
+        try {
+            const response = await API.get(`/api/analytics/summary?days=${this.currentPeriod}`);
+            const seoPerf = response.summary?.seo_performance || response.data?.summary?.seo_performance || {};
+            
+            // Update overall SEO score
+            const overallScore = seoPerf.average_seo_score || 0;
+            document.getElementById('overallSeoScore').textContent = overallScore.toFixed(0);
+            
+            // Update metric bars
+            const readabilityScore = seoPerf.average_readability_score || 0;
+            const performanceScore = seoPerf.average_performance_score || 0;
+            const accessibilityScore = seoPerf.average_accessibility_score || 0;
+            
+            document.getElementById('readabilityBar').style.width = readabilityScore + '%';
+            document.getElementById('performanceBar').style.width = performanceScore + '%';
+            document.getElementById('accessibilityBar').style.width = accessibilityScore + '%';
+            
+            document.getElementById('readabilityScore').textContent = readabilityScore.toFixed(0);
+            document.getElementById('performanceScore').textContent = performanceScore.toFixed(0);
+            document.getElementById('accessibilityScore').textContent = accessibilityScore.toFixed(0);
+            
+        } catch (error) {
+            console.error('Error loading SEO metrics:', error);
+        }
+    }
+
+    async loadTrendingTopics() {
+        try {
+            const response = await API.get(`/api/analytics/trending?days=${this.currentPeriod}`);
+            const topics = response.trending_topics || response.data?.trending_topics || [];
+            
+            const container = document.getElementById('trendingTopicsList');
+            
+            if (topics.length === 0) {
+                container.innerHTML = '<div class="no-data">No trending topics found</div>';
+                return;
+            }
+            
+            container.innerHTML = topics.slice(0, 8).map((topic, index) => `
+                <div class="topic-item">
+                    <div class="topic-rank">#${index + 1}</div>
+                    <div class="topic-content">
+                        <div class="topic-name">${topic.topic}</div>
+                        <div class="topic-stats">
+                            ${this.formatNumber(topic.total_views)} views • ${topic.post_count} posts
+                        </div>
+                    </div>
+                    <div class="topic-trend">
+                        <i class="fas fa-arrow-up"></i>
+                    </div>
+                </div>
+            `).join('');
+            
+        } catch (error) {
+            console.error('Error loading trending topics:', error);
+        }
+    }
+
+    async loadEngagementMetrics() {
+        try {
+            const response = await API.get(`/api/analytics/summary?days=${this.currentPeriod}`);
+            const performance = response.summary?.overall_performance || response.data?.summary?.overall_performance || {};
+            
+            // Update engagement metrics
+            document.getElementById('totalLikes').textContent = this.formatNumber(performance.total_likes || 0);
+            document.getElementById('totalShares').textContent = this.formatNumber(performance.total_shares || 0);
+            document.getElementById('totalComments').textContent = this.formatNumber(performance.total_comments || 0);
+            
+            // Average time spent (sample data)
+            document.getElementById('avgTimeSpent').textContent = '2:34';
+            
+        } catch (error) {
+            console.error('Error loading engagement metrics:', error);
+        }
+    }
+
+    updatePerformanceChart(metric) {
+        // Update chart based on selected metric
+        console.log('Updating performance chart for metric:', metric);
+        // This would update the chart data based on the selected metric
+    }
+
+    generateReport() {
+        // Generate comprehensive report
+        this.showToast('Generating comprehensive report...', 'info');
+        
+        setTimeout(() => {
+            this.showReportModal('comprehensive');
+        }, 2000);
+    }
+
+    showReportModal(reportType) {
+        const modal = this.createReportModal(reportType);
+        modal.show();
+    }
+
+    createReportModal(reportType) {
+        const reportTitles = {
+            performance: 'Performance Report',
+            seo: 'SEO Analysis Report',
+            engagement: 'Engagement Report',
+            content: 'Content Analysis Report',
+            comprehensive: 'Comprehensive Analytics Report'
+        };
+
+        const title = reportTitles[reportType] || 'Analytics Report';
+        
+        const modal = document.createElement('div');
+        modal.className = 'modal large';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>${title}</h3>
+                    <button class="modal-close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="report-preview">
+                        <div class="report-loading">Generating report...</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary modal-cancel">Close</button>
+                    <button class="btn btn-primary modal-download">Download PDF</button>
+                    <button class="btn btn-success modal-email">Email Report</button>
+                </div>
+            </div>
+        `;
+
+        // Event listeners
+        modal.querySelector('.modal-close').addEventListener('click', () => modal.remove());
+        modal.querySelector('.modal-cancel').addEventListener('click', () => modal.remove());
+        modal.querySelector('.modal-download').addEventListener('click', () => this.downloadReport(reportType));
+        modal.querySelector('.modal-email').addEventListener('click', () => this.emailReport(reportType));
+
+        document.body.appendChild(modal);
+        
+        // Simulate report generation
+        setTimeout(() => {
+            modal.querySelector('.report-loading').innerHTML = this.getReportContent(reportType);
+        }, 2000);
+
+        return {
+            show: () => modal.classList.add('show'),
+            hide: () => modal.classList.remove('show')
+        };
+    }
+
+    getReportContent(reportType) {
+        // This would generate actual report content based on the type
+        return `
+            <div class="report-content">
+                <h4>${reportType.charAt(0).toUpperCase() + reportType.slice(1)} Analysis</h4>
+                <p>This is a preview of your ${reportType} report. The full report would contain detailed analytics and insights.</p>
+                <div class="report-metrics">
+                    <div class="report-metric">
+                        <span class="metric-label">Total Posts:</span>
+                        <span class="metric-value">25</span>
+                    </div>
+                    <div class="report-metric">
+                        <span class="metric-label">Total Views:</span>
+                        <span class="metric-value">15,420</span>
+                    </div>
+                    <div class="report-metric">
+                        <span class="metric-label">Average Engagement:</span>
+                        <span class="metric-value">12.3%</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    downloadReport(reportType) {
+        this.showToast('Downloading report...', 'info');
+        // This would implement actual PDF generation and download
+    }
+
+    emailReport(reportType) {
+        // This would implement email sending functionality
+        this.showToast('Email report functionality coming soon', 'info');
+    }
+
+    exportData() {
+        this.showToast('Exporting analytics data...', 'info');
+        // This would implement data export functionality
+    }
+
+    generateSampleChartData() {
+        // Generate sample data for charts
+        const labels = [];
+        const views = [];
+        const engagement = [];
+        
+        for (let i = 6; i >= 0; i--) {
+            const date = new Date();
+            date.setDate(date.getDate() - i);
+            labels.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+            views.push(Math.floor(Math.random() * 500) + 100);
+            engagement.push((Math.random() * 10 + 5).toFixed(1));
+        }
+        
+        return { labels, views, engagement };
+    }
+
+    // Utility functions
+    formatNumber(num) {
+        if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+        if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+        return num.toString();
+    }
+
+    truncateText(text, maxLength) {
+        return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+    }
+
+    showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.textContent = message;
+        
+        document.getElementById('toastContainer').appendChild(toast);
+        setTimeout(() => toast.remove(), 5000);
+    }
+}
+
+// Initialize analytics when page loads
+document.addEventListener('DOMContentLoaded', () => {
+    window.analytics = new Analytics();
+});
+</script>
+{% endblock %}

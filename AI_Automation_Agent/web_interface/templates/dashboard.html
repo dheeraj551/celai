@@ -1,0 +1,612 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - AI Automation Agent{% endblock %}
+
+{% block page_title %}Dashboard{% endblock %}
+{% block page_description %}Monitor your AI automation agent status and performance{% endblock %}
+
+{% block content %}
+<div class="dashboard-grid">
+    <!-- Agent Status Card -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <h3><i class="fas fa-server"></i> Agent Status</h3>
+        </div>
+        <div class="card-content">
+            <div class="status-grid">
+                <div class="status-item">
+                    <div class="status-value" id="agentUptime">--</div>
+                    <div class="status-label">Uptime</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-value" id="modulesLoaded">--</div>
+                    <div class="status-label">Modules Loaded</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-value" id="databaseStatus">--</div>
+                    <div class="status-label">Database</div>
+                </div>
+            </div>
+            <div class="agent-actions">
+                <button class="btn btn-primary" id="startAgentBtn">
+                    <i class="fas fa-play"></i> Start Agent
+                </button>
+                <button class="btn btn-secondary" id="stopAgentBtn">
+                    <i class="fas fa-stop"></i> Stop Agent
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Blog Statistics Card -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <h3><i class="fas fa-blog"></i> Blog Automation</h3>
+        </div>
+        <div class="card-content">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-value" id="totalPosts">--</div>
+                    <div class="stat-label">Total Posts</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="totalViews">--</div>
+                    <div class="stat-label">Total Views</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="avgEngagement">--</div>
+                    <div class="stat-label">Avg Engagement</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="seoScore">--</div>
+                    <div class="stat-label">SEO Score</div>
+                </div>
+            </div>
+            <div class="quick-actions">
+                <button class="btn btn-success" id="generateBlogBtn">
+                    <i class="fas fa-plus"></i> Generate Blog
+                </button>
+                <button class="btn btn-info" id="generateSeriesBtn">
+                    <i class="fas fa-layer-group"></i> Generate Series
+                </button>
+                <a href="/blog-automation" class="btn btn-primary">
+                    <i class="fas fa-cog"></i> Manage All Blogs
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity Card -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <h3><i class="fas fa-history"></i> Recent Activity</h3>
+            <button class="btn-icon" id="refreshActivity">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+        </div>
+        <div class="card-content">
+            <div class="activity-list" id="recentActivity">
+                <div class="activity-item">
+                    <div class="activity-icon">
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-text">Loading recent activity...</div>
+                        <div class="activity-time">Just now</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Performance Card -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <h3><i class="fas fa-chart-line"></i> Performance Metrics</h3>
+        </div>
+        <div class="card-content">
+            <canvas id="performanceChart" width="400" height="200"></canvas>
+        </div>
+    </div>
+
+    <!-- Trending Topics Card -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <h3><i class="fas fa-fire"></i> Trending Topics</h3>
+            <button class="btn-icon" id="refreshTrending">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+        </div>
+        <div class="card-content">
+            <div class="trending-topics" id="trendingTopics">
+                <div class="topic-item">
+                    <div class="topic-loading">Loading trending topics...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats Card -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <h3><i class="fas fa-trophy"></i> Top Performing Posts</h3>
+        </div>
+        <div class="card-content">
+            <div class="top-posts" id="topPosts">
+                <div class="post-item">
+                    <div class="post-loading">Loading top posts...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Initialize API client
+const api = window.API;
+
+// Dashboard specific JavaScript
+class Dashboard {
+    constructor() {
+        this.websocket = new WebSocketManager();
+        this.chart = null;
+        
+        // Hide loading immediately to prevent stuck loading
+        this.showLoading(false);
+        
+        this.initializeEventListeners();
+        this.loadDashboardData();
+    }
+
+    initializeEventListeners() {
+        // Agent control buttons
+        document.getElementById('startAgentBtn').addEventListener('click', () => this.startAgent());
+        document.getElementById('stopAgentBtn').addEventListener('click', () => this.stopAgent());
+        
+        // Blog generation buttons
+        document.getElementById('generateBlogBtn').addEventListener('click', () => this.showBlogGenerationModal());
+        document.getElementById('generateSeriesBtn').addEventListener('click', () => this.showSeriesGenerationModal());
+        
+        // Refresh buttons
+        document.getElementById('refreshActivity').addEventListener('click', () => this.loadRecentActivity());
+        document.getElementById('refreshTrending').addEventListener('click', () => this.loadTrendingTopics());
+    }
+
+    async loadDashboardData() {
+        try {
+            console.log('Dashboard: Loading all data...');
+            
+            // Load all data in parallel with error handling
+            await Promise.allSettled([
+                this.loadAgentStatus(),
+                this.loadBlogStatistics(),
+                this.loadRecentActivity(),
+                this.loadTrendingTopics(),
+                this.loadTopPosts()
+            ]);
+            
+            // Initialize performance chart
+            this.initializePerformanceChart();
+            
+            console.log('Dashboard: All data loading completed');
+            
+        } catch (error) {
+            console.error('Error loading dashboard data:', error);
+            this.showToast('Error loading dashboard data', 'error');
+        }
+    }
+
+    async loadAgentStatus() {
+        try {
+            console.log('Loading agent status...');
+            const response = await api.get('/api/status');
+            const data = response.data || response;
+            
+            // Update agent uptime
+            const uptimeSeconds = data.agent?.uptime_seconds || 0;
+            document.getElementById('agentUptime').textContent = this.formatUptime(uptimeSeconds);
+            
+            // Update modules loaded
+            const modulesCount = data.modules ? Object.keys(data.modules).length : 0;
+            document.getElementById('modulesLoaded').textContent = modulesCount;
+            
+            // Update database status
+            const dbConnected = data.database?.connected || false;
+            document.getElementById('databaseStatus').innerHTML = 
+                dbConnected ? '<span class="status-connected">Connected</span>' : '<span class="status-disconnected">Disconnected</span>';
+            
+            // Update agent status indicator
+            const isRunning = data.agent?.is_running || false;
+            this.updateAgentStatusIndicator(isRunning);
+            
+        } catch (error) {
+            console.error('Error loading agent status:', error);
+            // Set default values on error
+            document.getElementById('agentUptime').textContent = '--';
+            document.getElementById('modulesLoaded').textContent = '--';
+            document.getElementById('databaseStatus').innerHTML = '<span class="status-disconnected">Error</span>';
+        }
+    }
+
+    async loadBlogStatistics() {
+        try {
+            const response = await api.get('/api/analytics/summary?days=30');
+            const summary = response.summary || response.data?.summary;
+            
+            if (summary) {
+                // Update statistics
+                document.getElementById('totalPosts').textContent = summary.overall_performance?.total_posts || 0;
+                document.getElementById('totalViews').textContent = this.formatNumber(summary.overall_performance?.total_views || 0);
+                document.getElementById('avgEngagement').textContent = (summary.overall_performance?.average_engagement_rate || 0) + '%';
+                document.getElementById('seoScore').textContent = (summary.overall_performance?.average_seo_score || 0) + '/100';
+            }
+            
+        } catch (error) {
+            console.error('Error loading blog statistics:', error);
+        }
+    }
+
+    async loadRecentActivity() {
+        try {
+            const response = await api.get('/api/blog/posts?limit=5');
+            const posts = response.posts || response.data?.posts || [];
+            
+            const activityContainer = document.getElementById('recentActivity');
+            activityContainer.innerHTML = '';
+            
+            posts.forEach(post => {
+                const activityItem = document.createElement('div');
+                activityItem.className = 'activity-item';
+                activityItem.innerHTML = `
+                    <div class="activity-icon">
+                        <i class="fas fa-blog"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-text">${post.title}</div>
+                        <div class="activity-time">${this.timeAgo(post.created_at)}</div>
+                    </div>
+                    <div class="activity-status status-${post.status}">
+                        ${post.status}
+                    </div>
+                `;
+                activityContainer.appendChild(activityItem);
+            });
+            
+        } catch (error) {
+            console.error('Error loading recent activity:', error);
+        }
+    }
+
+    async loadTrendingTopics() {
+        try {
+            const response = await api.get('/api/analytics/trending');
+            const topics = response.trending_topics || response.data?.trending_topics || [];
+            
+            const topicsContainer = document.getElementById('trendingTopics');
+            topicsContainer.innerHTML = '';
+            
+            topics.forEach((topic, index) => {
+                const topicItem = document.createElement('div');
+                topicItem.className = 'topic-item';
+                topicItem.innerHTML = `
+                    <div class="topic-rank">#${index + 1}</div>
+                    <div class="topic-content">
+                        <div class="topic-name">${topic.topic}</div>
+                        <div class="topic-stats">
+                            ${this.formatNumber(topic.total_views)} views • ${topic.post_count} posts
+                        </div>
+                    </div>
+                `;
+                topicsContainer.appendChild(topicItem);
+            });
+            
+        } catch (error) {
+            console.error('Error loading trending topics:', error);
+        }
+    }
+
+    async loadTopPosts() {
+        try {
+            const response = await api.get('/api/analytics/summary');
+            const posts = response.summary?.top_performing_posts || response.data?.summary?.top_performing_posts || [];
+            
+            const postsContainer = document.getElementById('topPosts');
+            postsContainer.innerHTML = '';
+            
+            posts.forEach(post => {
+                const postItem = document.createElement('div');
+                postItem.className = 'post-item';
+                postItem.innerHTML = `
+                    <div class="post-title">${post.title}</div>
+                    <div class="post-stats">
+                        ${this.formatNumber(post.views)} views • ${post.likes} likes • ${post.shares} shares
+                    </div>
+                    <div class="post-metrics">
+                        <span class="metric">${post.engagement_rate}% engagement</span>
+                        <span class="metric">${post.seo_score}/100 SEO</span>
+                    </div>
+                `;
+                postsContainer.appendChild(postItem);
+            });
+            
+        } catch (error) {
+            console.error('Error loading top posts:', error);
+        }
+    }
+
+    initializePerformanceChart() {
+        const ctx = document.getElementById('performanceChart').getContext('2d');
+        
+        // Sample data - in real implementation, this would come from API
+        const chartData = {
+            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+            datasets: [{
+                label: 'Blog Posts',
+                data: [2, 3, 1, 4, 2, 3, 1],
+                borderColor: '#3b82f6',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                tension: 0.4
+            }, {
+                label: 'Views',
+                data: [150, 220, 180, 350, 280, 420, 200],
+                borderColor: '#10b981',
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                tension: 0.4,
+                yAxisID: 'y1'
+            }]
+        };
+
+        this.chart = new Chart(ctx, {
+            type: 'line',
+            data: chartData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                },
+                scales: {
+                    x: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Day of Week'
+                        }
+                    },
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        title: {
+                            display: true,
+                            text: 'Posts'
+                        }
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        title: {
+                            display: true,
+                            text: 'Views'
+                        },
+                        grid: {
+                            drawOnChartArea: false,
+                        },
+                    }
+                }
+            }
+        });
+    }
+
+    async startAgent() {
+        try {
+            this.showLoading(true);
+            const response = await api.post('/api/agent/start');
+            this.showToast(response.message || 'Agent started successfully', 'success');
+            await this.loadAgentStatus();
+        } catch (error) {
+            this.showToast('Failed to start agent', 'error');
+        } finally {
+            this.showLoading(false);
+        }
+    }
+
+    async stopAgent() {
+        try {
+            this.showLoading(true);
+            const response = await api.post('/api/agent/stop');
+            this.showToast(response.message || 'Agent stopped successfully', 'success');
+            await this.loadAgentStatus();
+        } catch (error) {
+            this.showToast('Failed to stop agent', 'error');
+        } finally {
+            this.showLoading(false);
+        }
+    }
+
+    showBlogGenerationModal() {
+        // Create and show blog generation modal
+        const modal = this.createModal('Generate Blog Post', this.getBlogGenerationForm());
+        modal.show();
+    }
+
+    showSeriesGenerationModal() {
+        // Create and show series generation modal
+        const modal = this.createModal('Generate Blog Series', this.getSeriesGenerationForm());
+        modal.show();
+    }
+
+    getBlogGenerationForm() {
+        return `
+            <form id="blogGenerationForm">
+                <div class="form-group">
+                    <label>Topic</label>
+                    <input type="text" id="blogTopic" placeholder="e.g., AI in Healthcare" required>
+                </div>
+                <div class="form-group">
+                    <label>Max Words</label>
+                    <input type="number" id="blogMaxWords" value="800" min="100" max="2000">
+                </div>
+                <div class="form-group">
+                    <label>Target Audience</label>
+                    <select id="blogAudience">
+                        <option value="general">General</option>
+                        <option value="professionals">Professionals</option>
+                        <option value="experts">Experts</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="publishImmediately"> Publish immediately
+                    </label>
+                </div>
+            </form>
+        `;
+    }
+
+    getSeriesGenerationForm() {
+        return `
+            <form id="seriesGenerationForm">
+                <div class="form-group">
+                    <label>Main Topic</label>
+                    <input type="text" id="seriesTopic" placeholder="e.g., Python Programming" required>
+                </div>
+                <div class="form-group">
+                    <label>Number of Posts</label>
+                    <input type="number" id="seriesCount" value="3" min="2" max="10">
+                </div>
+            </form>
+        `;
+    }
+
+    createModal(title, content) {
+        // Simple modal implementation
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>${title}</h3>
+                    <button class="modal-close">&times;</button>
+                </div>
+                <div class="modal-body">${content}</div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary modal-cancel">Cancel</button>
+                    <button class="btn btn-primary modal-submit">Generate</button>
+                </div>
+            </div>
+        `;
+
+        // Add event listeners
+        modal.querySelector('.modal-close').addEventListener('click', () => modal.remove());
+        modal.querySelector('.modal-cancel').addEventListener('click', () => modal.remove());
+        modal.querySelector('.modal-submit').addEventListener('click', () => this.handleModalSubmit(title, modal));
+
+        document.body.appendChild(modal);
+        return {
+            show: () => modal.classList.add('show'),
+            hide: () => modal.classList.remove('show')
+        };
+    }
+
+    async handleModalSubmit(title, modal) {
+        try {
+            this.showLoading(true);
+            
+            if (title.includes('Blog Post')) {
+                const response = await api.post('/api/blog/generate', {
+                    topic: document.getElementById('blogTopic').value,
+                    max_words: parseInt(document.getElementById('blogMaxWords').value),
+                    publish_immediately: document.getElementById('publishImmediately').checked
+                });
+            } else if (title.includes('Blog Series')) {
+                const response = await api.post('/api/blog/series', {
+                    main_topic: document.getElementById('seriesTopic').value,
+                    num_posts: parseInt(document.getElementById('seriesCount').value)
+                });
+            }
+
+            this.showToast('Generation started successfully', 'success');
+            modal.remove();
+            await this.loadRecentActivity();
+            
+        } catch (error) {
+            this.showToast('Generation failed', 'error');
+        } finally {
+            this.showLoading(false);
+        }
+    }
+
+    updateAgentStatusIndicator(isRunning) {
+        const statusElement = document.getElementById('agentStatus');
+        const statusDot = statusElement.querySelector('.status-dot');
+        const statusText = statusElement.querySelector('.status-text');
+        
+        if (isRunning) {
+            statusDot.className = 'status-dot status-online';
+            statusText.textContent = 'Running';
+        } else {
+            statusDot.className = 'status-dot status-offline';
+            statusText.textContent = 'Stopped';
+        }
+    }
+
+    // Utility functions
+    formatUptime(seconds) {
+        const days = Math.floor(seconds / 86400);
+        const hours = Math.floor((seconds % 86400) / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+        
+        if (days > 0) return `${days}d ${hours}h`;
+        if (hours > 0) return `${hours}h ${minutes}m`;
+        return `${minutes}m`;
+    }
+
+    formatNumber(num) {
+        if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+        if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+        return num.toString();
+    }
+
+    timeAgo(timestamp) {
+        const now = new Date();
+        const time = new Date(timestamp);
+        const diffInSeconds = (now - time) / 1000;
+        
+        if (diffInSeconds < 60) return 'Just now';
+        if (diffInSeconds < 3600) return Math.floor(diffInSeconds / 60) + 'm ago';
+        if (diffInSeconds < 86400) return Math.floor(diffInSeconds / 3600) + 'h ago';
+        return Math.floor(diffInSeconds / 86400) + 'd ago';
+    }
+
+    showToast(message, type = 'info') {
+        // Simple toast implementation
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.textContent = message;
+        
+        document.getElementById('toastContainer').appendChild(toast);
+        
+        setTimeout(() => toast.remove(), 5000);
+    }
+
+    showLoading(show) {
+        const overlay = document.getElementById('loadingOverlay');
+        if (overlay) {
+            overlay.style.display = show ? 'flex' : 'none';
+        }
+    }
+}
+
+// Initialize dashboard when page loads
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('Dashboard: Starting initialization...');
+    new Dashboard();
+    console.log('Dashboard: Initialization complete');
+});
+</script>
+{% endblock %}

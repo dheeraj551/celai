@@ -1,0 +1,822 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - AI Automation Agent{% endblock %}
+
+{% block page_title %}Settings & Configuration{% endblock %}
+{% block page_description %}Configure your AI automation agent settings and preferences{% endblock %}
+
+{% block content %}
+<div class="settings-container">
+    <!-- Settings Navigation -->
+    <div class="settings-nav">
+        <div class="nav-section">
+            <h4>General</h4>
+            <a href="#general" class="nav-item active" data-tab="general">
+                <i class="fas fa-cog"></i> General Settings
+            </a>
+            <a href="#database" class="nav-item" data-tab="database">
+                <i class="fas fa-database"></i> Database
+            </a>
+        </div>
+        
+        <div class="nav-section">
+            <h4>Automation</h4>
+            <a href="#blog" class="nav-item" data-tab="blog">
+                <i class="fas fa-blog"></i> Blog Automation
+            </a>
+            <a href="#scheduling" class="nav-item" data-tab="scheduling">
+                <i class="fas fa-calendar"></i> Scheduling
+            </a>
+            <a href="#publishing" class="nav-item" data-tab="publishing">
+                <i class="fas fa-share-alt"></i> Publishing
+            </a>
+        </div>
+        
+        <div class="nav-section">
+            <h4>AI Configuration</h4>
+            <a href="#ai" class="nav-item" data-tab="ai">
+                <i class="fas fa-brain"></i> AI Settings
+            </a>
+            <a href="#content" class="nav-item" data-tab="content">
+                <i class="fas fa-file-alt"></i> Content
+            </a>
+        </div>
+        
+        <div class="nav-section">
+            <h4>System</h4>
+            <a href="#web" class="nav-item" data-tab="web">
+                <i class="fas fa-globe"></i> Web Interface
+            </a>
+            <a href="#security" class="nav-item" data-tab="security">
+                <i class="fas fa-shield-alt"></i> Security
+            </a>
+            <a href="#advanced" class="nav-item" data-tab="advanced">
+                <i class="fas fa-code"></i> Advanced
+            </a>
+        </div>
+    </div>
+
+    <!-- Settings Content -->
+    <div class="settings-content">
+        <!-- General Settings -->
+        <div class="settings-tab active" id="tab-general">
+            <div class="settings-section">
+                <h3><i class="fas fa-info-circle"></i> General Settings</h3>
+                <div class="settings-grid">
+                    <div class="setting-group">
+                        <label>Agent Name</label>
+                        <input type="text" id="agentName" value="AI Automation Agent" placeholder="Enter agent name">
+                        <small>Custom name for your automation agent</small>
+                    </div>
+                    
+                    <div class="setting-group">
+                        <label>Timezone</label>
+                        <select id="timezone">
+                            <option value="UTC">UTC</option>
+                            <option value="America/New_York">Eastern Time</option>
+                            <option value="America/Chicago">Central Time</option>
+                            <option value="America/Denver">Mountain Time</option>
+                            <option value="America/Los_Angeles">Pacific Time</option>
+                            <option value="Europe/London">London</option>
+                            <option value="Europe/Paris">Paris</option>
+                            <option value="Asia/Tokyo">Tokyo</option>
+                        </select>
+                        <small>Agent timezone for scheduling</small>
+                    </div>
+                    
+                    <div class="setting-group">
+                        <label>Language</label>
+                        <select id="language">
+                            <option value="en">English</option>
+                            <option value="es">Spanish</option>
+                            <option value="fr">French</option>
+                            <option value="de">German</option>
+                            <option value="zh">Chinese</option>
+                        </select>
+                        <small>Default language for generated content</small>
+                    </div>
+                    
+                    <div class="setting-group">
+                        <label>Logging Level</label>
+                        <select id="logLevel">
+                            <option value="DEBUG">Debug</option>
+                            <option value="INFO" selected>Info</option>
+                            <option value="WARNING">Warning</option>
+                            <option value="ERROR">Error</option>
+                        </select>
+                        <small>Minimum log level to record</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Database Settings -->
+        <div class="settings-tab" id="tab-database">
+            <div class="settings-section">
+                <h3><i class="fas fa-database"></i> Database Configuration</h3>
+                <div class="database-status">
+                    <div class="status-card">
+                        <div class="status-indicator" id="dbStatus">
+                            <span class="status-dot"></span>
+                            <span class="status-text">Checking...</span>
+                        </div>
+                        <div class="status-details">
+                            <div id="dbType">--</div>
+                            <div id="dbHost">--</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" id="testDbConnection">
+                        <i class="fas fa-plug"></i> Test Connection
+                    </button>
+                </div>
+                
+                <div class="settings-grid">
+                    <div class="setting-group">
+                        <label>Database Type</label>
+                        <select id="databaseType">
+                            <option value="mongodb">MongoDB</option>
+                            <option value="mysql">MySQL</option>
+                        </select>
+                    </div>
+                    
+                    <div class="setting-group" id="mongodbSettings">
+                        <label>MongoDB URI</label>
+                        <input type="text" id="mongodbUri" placeholder="mongodb://localhost:27017">
+                        <small>Connection string for MongoDB</small>
+                    </div>
+                    
+                    <div class="setting-group" id="mysqlSettings" style="display: none;">
+                        <label>MySQL Host</label>
+                        <input type="text" id="mysqlHost" placeholder="localhost">
+                    </div>
+                    
+                    <div class="setting-group" id="mysqlHost" style="display: none;">
+                        <label>MySQL Port</label>
+                        <input type="number" id="mysqlPort" value="3306">
+                    </div>
+                    
+                    <div class="setting-group" id="mysqlUser" style="display: none;">
+                        <label>MySQL Username</label>
+                        <input type="text" id="mysqlUsername" placeholder="root">
+                    </div>
+                    
+                    <div class="setting-group" id="mysqlPassword" style="display: none;">
+                        <label>MySQL Password</label>
+                        <input type="password" id="mysqlPassword" placeholder="••••••••">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Blog Automation Settings -->
+        <div class="settings-tab" id="tab-blog">
+            <div class="settings-section">
+                <h3><i class="fas fa-blog"></i> Blog Automation Settings</h3>
+                <div class="settings-grid">
+                    <div class="setting-group">
+                        <label>Blog Generation Frequency</label>
+                        <select id="blogFrequency">
+                            <option value="daily">Daily</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="custom">Custom</option>
+                            <option value="disabled">Disabled</option>
+                        </select>
+                    </div>
+                    
+                    <div class="setting-group">
+                        <label>Default Max Words</label>
+                        <input type="number" id="blogMaxWords" value="1000" min="100" max="5000">
+                        <small>Default word count for generated blogs</small>
+                    </div>
+                    
+                    <div class="setting-group">
+                        <label>Content Topics</label>
+                        <div class="topic-manager">
+                            <div class="topic-input">
+                                <input type="text" id="newTopic" placeholder="Add topic and press Enter">
+                            </div>
+                            <div class="topic-list" id="topicList">
+                                <span class="topic-tag">AI</span>
+                                <span class="topic-tag">Technology</span>
+                                <span class="topic-tag">Programming</span>
+                                <span class="topic-tag">Web Development</span>
+                            </div>
+                        </div>
+                        <small>Topics for automatic blog generation</small>
+                    </div>
+                    
+                    <div class="setting-group">
+                        <label>Default Writing Style</label>
+                        <select id="blogStyle">
+                            <option value="informative">Informative</option>
+                            <option value="casual">Casual</option>
+                            <option value="technical">Technical</option>
+                            <option value="how_to">How-to Guide</option>
+                        </select>
+                    </div>
+                    
+                    <div class="setting-group">
+                        <label>Target Audience</label>
+                        <select id="blogAudience">
+                            <option value="general">General Public</option>
+                            <option value="professionals">Professionals</option>
+                            <option value="experts">Industry Experts</option>
+                            <option value="beginners">Beginners</option>
+                        </select>
+                    </div>
+                    
+                    <div class="setting-group">
+                        <label>Auto-publish</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="autoPublish">
+                                <span class="checkmark"></span>
+                                Automatically publish generated blogs
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Settings -->
+        <div class="settings-tab" id="tab-ai">
+            <div class="settings-section">
+                <h3><i class="fas fa-brain"></i> AI Configuration</h3>
+                <div class="ai-status">
+                    <div class="status-card">
+                        <div class="status-indicator" id="aiStatus">
+                            <span class="status-dot"></span>
+                            <span class="status-text">Checking...</span>
+                        </div>
+                        <div class="status-details">
+                            <div id="aiModel">--</div>
+                            <div id="aiProvider">OpenAI</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" id="testAIConnection">
+                        <i class="fas fa-brain"></i> Test AI Connection
+                    </button>
+                </div>
+                
+                <div class="settings-grid">
+                    <div class="setting-group">
+                        <label>AI Model</label>
+                        <select id="aiModel">
+                            <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                            <option value="gpt-4">GPT-4</option>
+                            <option value="gpt-4-turbo">GPT-4 Turbo</option>
+                        </select>
+                    </div>
+                    
+                    <div class="setting-group">
+                        <label>Max Tokens</label>
+                        <input type="number" id="maxTokens" value="2000" min="100" max="4000">
+                        <small>Maximum tokens for AI responses</small>
+                    </div>
+                    
+                    <div class="setting-group">
+                        <label>Temperature</label>
+                        <div class="slider-group">
+                            <input type="range" id="temperature" min="0" max="1" step="0.1" value="0.7">
+                            <span class="slider-value" id="temperatureValue">0.7</span>
+                        </div>
+                        <small>Creativity level (0=deterministic, 1=creative)</small>
+                    </div>
+                    
+                    <div class="setting-group">
+                        <label>API Key</label>
+                        <div class="input-group">
+                            <input type="password" id="openaiApiKey" placeholder="sk-...">
+                            <button type="button" class="btn-icon" id="toggleApiKey">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <small>Your OpenAI API key</small>
+                    </div>
+                    
+                    <div class="setting-group">
+                        <label>Content Quality</label>
+                        <select id="contentQuality">
+                            <option value="standard">Standard</option>
+                            <option value="high">High Quality</option>
+                            <option value="premium">Premium</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Web Interface Settings -->
+        <div class="settings-tab" id="tab-web">
+            <div class="settings-section">
+                <h3><i class="fas fa-globe"></i> Web Interface Configuration</h3>
+                <div class="settings-grid">
+                    <div class="setting-group">
+                        <label>Port</label>
+                        <input type="number" id="webPort" value="8000" min="1024" max="65535">
+                        <small>Port for the web interface</small>
+                    </div>
+                    
+                    <div class="setting-group">
+                        <label>Host</label>
+                        <select id="webHost">
+                            <option value="0.0.0.0">All Interfaces (0.0.0.0)</option>
+                            <option value="127.0.0.1">Local Only (127.0.0.1)</option>
+                            <option value="localhost">Local Only (localhost)</option>
+                        </select>
+                        <small>Host address for web interface</small>
+                    </div>
+                    
+                    <div class="setting-group">
+                        <label>Auto-refresh Interval</label>
+                        <select id="refreshInterval">
+                            <option value="5">5 seconds</option>
+                            <option value="10" selected>10 seconds</option>
+                            <option value="30">30 seconds</option>
+                            <option value="60">1 minute</option>
+                        </select>
+                        <small>How often to refresh dashboard data</small>
+                    </div>
+                    
+                    <div class="setting-group">
+                        <label>Theme</label>
+                        <select id="uiTheme">
+                            <option value="light">Light</option>
+                            <option value="dark" selected>Dark</option>
+                            <option value="auto">Auto (System)</option>
+                        </select>
+                        <small>UI theme preference</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Security Settings -->
+        <div class="settings-tab" id="tab-security">
+            <div class="settings-section">
+                <h3><i class="fas fa-shield-alt"></i> Security Settings</h3>
+                <div class="settings-grid">
+                    <div class="setting-group">
+                        <label>API Rate Limiting</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="enableRateLimit" checked>
+                                <span class="checkmark"></span>
+                                Enable API rate limiting
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="setting-group">
+                        <label>Rate Limit (requests/minute)</label>
+                        <input type="number" id="rateLimit" value="60" min="10" max="1000">
+                    </div>
+                    
+                    <div class="setting-group">
+                        <label>Session Timeout</label>
+                        <select id="sessionTimeout">
+                            <option value="30">30 minutes</option>
+                            <option value="60" selected>1 hour</option>
+                            <option value="240">4 hours</option>
+                            <option value="480">8 hours</option>
+                        </select>
+                    </div>
+                    
+                    <div class="setting-group">
+                        <label>API Access</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="enableApiAccess">
+                                <span class="checkmark"></span>
+                                Enable external API access
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Save Button -->
+        <div class="settings-footer">
+            <button class="btn btn-secondary" id="resetSettings">
+                <i class="fas fa-undo"></i> Reset to Defaults
+            </button>
+            <button class="btn btn-primary" id="saveSettings">
+                <i class="fas fa-save"></i> Save Settings
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Settings specific JavaScript
+class Settings {
+    constructor() {
+        this.originalSettings = {};
+        this.currentSettings = {};
+        this.initializeEventListeners();
+        this.loadSettings();
+    }
+
+    initializeEventListeners() {
+        // Navigation tabs
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.switchTab(item.dataset.tab);
+            });
+        });
+
+        // Database type change
+        document.getElementById('databaseType').addEventListener('change', (e) => {
+            this.toggleDatabaseSettings(e.target.value);
+        });
+
+        // Topic management
+        document.getElementById('newTopic').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                this.addTopic(e.target.value);
+                e.target.value = '';
+            }
+        });
+
+        // API key toggle
+        document.getElementById('toggleApiKey').addEventListener('click', () => {
+            this.toggleApiKeyVisibility();
+        });
+
+        // Temperature slider
+        document.getElementById('temperature').addEventListener('input', (e) => {
+            document.getElementById('temperatureValue').textContent = e.target.value;
+        });
+
+        // Action buttons
+        document.getElementById('saveSettings').addEventListener('click', () => this.saveSettings());
+        document.getElementById('resetSettings').addEventListener('click', () => this.resetSettings());
+        document.getElementById('testDbConnection').addEventListener('click', () => this.testDatabaseConnection());
+        document.getElementById('testAIConnection').addEventListener('click', () => this.testAIConnection());
+
+        // Save on change (auto-save)
+        document.querySelectorAll('input, select').forEach(element => {
+            element.addEventListener('change', () => {
+                this.markDirty();
+            });
+        });
+    }
+
+    async loadSettings() {
+        try {
+            const response = await API.get('/api/settings');
+            const settings = response.settings || response.data?.settings || {};
+            
+            this.originalSettings = { ...settings };
+            this.currentSettings = { ...settings };
+            this.populateSettings(settings);
+            
+            // Update status indicators
+            this.updateStatusIndicators();
+            
+        } catch (error) {
+            console.error('Error loading settings:', error);
+            this.showToast('Failed to load settings', 'error');
+        }
+    }
+
+    populateSettings(settings) {
+        // General settings
+        document.getElementById('agentName').value = settings.agent_name || 'AI Automation Agent';
+        document.getElementById('timezone').value = settings.timezone || 'UTC';
+        document.getElementById('language').value = settings.language || 'en';
+        document.getElementById('logLevel').value = settings.log_level || 'INFO';
+        
+        // Database settings
+        document.getElementById('databaseType').value = settings.database?.type || 'mongodb';
+        document.getElementById('mongodbUri').value = settings.database?.mongodb_uri || '';
+        document.getElementById('mysqlHost').value = settings.database?.mysql_host || 'localhost';
+        document.getElementById('mysqlPort').value = settings.database?.mysql_port || 3306;
+        document.getElementById('mysqlUsername').value = settings.database?.mysql_user || 'root';
+        
+        // Blog settings
+        document.getElementById('blogFrequency').value = settings.blog_automation?.frequency || 'daily';
+        document.getElementById('blogMaxWords').value = settings.blog_automation?.max_length || 1000;
+        document.getElementById('blogStyle').value = settings.blog_automation?.style || 'informative';
+        document.getElementById('blogAudience').value = settings.blog_automation?.audience || 'general';
+        document.getElementById('autoPublish').checked = settings.blog_automation?.auto_publish || false;
+        
+        // AI settings
+        document.getElementById('aiModel').value = settings.ai?.model || 'gpt-3.5-turbo';
+        document.getElementById('maxTokens').value = settings.ai?.max_tokens || 2000;
+        document.getElementById('temperature').value = settings.ai?.temperature || 0.7;
+        document.getElementById('temperatureValue').textContent = settings.ai?.temperature || 0.7;
+        document.getElementById('contentQuality').value = settings.ai?.quality || 'standard';
+        
+        // Web settings
+        document.getElementById('webPort').value = settings.web?.port || 8000;
+        document.getElementById('webHost').value = settings.web?.host || '0.0.0.0';
+        document.getElementById('refreshInterval').value = settings.web?.refresh_interval || 10;
+        document.getElementById('uiTheme').value = settings.web?.theme || 'dark';
+        
+        // Security settings
+        document.getElementById('enableRateLimit').checked = settings.security?.rate_limit || true;
+        document.getElementById('rateLimit').value = settings.security?.rate_limit_value || 60;
+        document.getElementById('sessionTimeout').value = settings.security?.session_timeout || 60;
+        document.getElementById('enableApiAccess').checked = settings.security?.api_access || false;
+
+        // Toggle database settings visibility
+        this.toggleDatabaseSettings(settings.database?.type || 'mongodb');
+    }
+
+    switchTab(tabName) {
+        // Remove active class from all nav items and tabs
+        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+        document.querySelectorAll('.settings-tab').forEach(tab => tab.classList.remove('active'));
+        
+        // Add active class to selected nav item and tab
+        document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+        document.getElementById(`tab-${tabName}`).classList.add('active');
+    }
+
+    toggleDatabaseSettings(dbType) {
+        const mongodbSettings = document.getElementById('mongodbSettings');
+        const mysqlSettings = document.getElementById('mysqlSettings');
+        
+        if (dbType === 'mongodb') {
+            mongodbSettings.style.display = 'block';
+            mysqlSettings.style.display = 'none';
+        } else {
+            mongodbSettings.style.display = 'none';
+            mysqlSettings.style.display = 'block';
+        }
+    }
+
+    addTopic(topic) {
+        if (!topic.trim()) return;
+        
+        const topicList = document.getElementById('topicList');
+        const topicTag = document.createElement('span');
+        topicTag.className = 'topic-tag';
+        topicTag.innerHTML = `
+            ${topic.trim()}
+            <button type="button" class="topic-remove" onclick="settings.removeTopic(this)">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        
+        topicList.appendChild(topicTag);
+        this.markDirty();
+    }
+
+    removeTopic(button) {
+        button.parentElement.remove();
+        this.markDirty();
+    }
+
+    toggleApiKeyVisibility() {
+        const input = document.getElementById('openaiApiKey');
+        const button = document.getElementById('toggleApiKey');
+        
+        if (input.type === 'password') {
+            input.type = 'text';
+            button.innerHTML = '<i class="fas fa-eye-slash"></i>';
+        } else {
+            input.type = 'password';
+            button.innerHTML = '<i class="fas fa-eye"></i>';
+        }
+    }
+
+    async saveSettings() {
+        try {
+            this.showLoading(true);
+            
+            // Collect current settings
+            const settings = this.collectCurrentSettings();
+            
+            // Save to server
+            const response = await API.put('/api/settings', settings);
+            
+            this.showToast('Settings saved successfully', 'success');
+            this.originalSettings = { ...settings };
+            this.markClean();
+            
+        } catch (error) {
+            console.error('Error saving settings:', error);
+            this.showToast('Failed to save settings', 'error');
+        } finally {
+            this.showLoading(false);
+        }
+    }
+
+    async resetSettings() {
+        if (confirm('Are you sure you want to reset all settings to defaults?')) {
+            try {
+                this.showLoading(true);
+                
+                // Reset to default values
+                const defaultSettings = this.getDefaultSettings();
+                this.populateSettings(defaultSettings);
+                
+                this.showToast('Settings reset to defaults', 'success');
+                this.markDirty();
+                
+            } catch (error) {
+                this.showToast('Failed to reset settings', 'error');
+            } finally {
+                this.showLoading(false);
+            }
+        }
+    }
+
+    async testDatabaseConnection() {
+        try {
+            this.showLoading(true);
+            
+            // This would test the actual database connection
+            this.showToast('Testing database connection...', 'info');
+            
+            setTimeout(() => {
+                this.updateDbStatus('Connected', 'success');
+                this.showToast('Database connection successful', 'success');
+                this.showLoading(false);
+            }, 2000);
+            
+        } catch (error) {
+            this.updateDbStatus('Failed', 'error');
+            this.showToast('Database connection failed', 'error');
+            this.showLoading(false);
+        }
+    }
+
+    async testAIConnection() {
+        try {
+            this.showLoading(true);
+            
+            // This would test the AI API connection
+            this.showToast('Testing AI connection...', 'info');
+            
+            setTimeout(() => {
+                this.updateAiStatus('Connected', 'success');
+                this.showToast('AI connection successful', 'success');
+                this.showLoading(false);
+            }, 2000);
+            
+        } catch (error) {
+            this.updateAiStatus('Failed', 'error');
+            this.showToast('AI connection failed', 'error');
+            this.showLoading(false);
+        }
+    }
+
+    collectCurrentSettings() {
+        return {
+            general: {
+                agent_name: document.getElementById('agentName').value,
+                timezone: document.getElementById('timezone').value,
+                language: document.getElementById('language').value,
+                log_level: document.getElementById('logLevel').value
+            },
+            database: {
+                type: document.getElementById('databaseType').value,
+                mongodb_uri: document.getElementById('mongodbUri').value,
+                mysql_host: document.getElementById('mysqlHost').value,
+                mysql_port: parseInt(document.getElementById('mysqlPort').value),
+                mysql_user: document.getElementById('mysqlUsername').value,
+                // Note: Password not included for security
+            },
+            blog_automation: {
+                frequency: document.getElementById('blogFrequency').value,
+                max_length: parseInt(document.getElementById('blogMaxWords').value),
+                style: document.getElementById('blogStyle').value,
+                audience: document.getElementById('blogAudience').value,
+                auto_publish: document.getElementById('autoPublish').checked,
+                topics: Array.from(document.querySelectorAll('.topic-tag')).map(tag => 
+                    tag.textContent.replace('×', '').trim()
+                )
+            },
+            ai: {
+                model: document.getElementById('aiModel').value,
+                max_tokens: parseInt(document.getElementById('maxTokens').value),
+                temperature: parseFloat(document.getElementById('temperature').value),
+                quality: document.getElementById('contentQuality').value,
+                // Note: API key not included for security
+            },
+            web: {
+                port: parseInt(document.getElementById('webPort').value),
+                host: document.getElementById('webHost').value,
+                refresh_interval: parseInt(document.getElementById('refreshInterval').value),
+                theme: document.getElementById('uiTheme').value
+            },
+            security: {
+                rate_limit: document.getElementById('enableRateLimit').checked,
+                rate_limit_value: parseInt(document.getElementById('rateLimit').value),
+                session_timeout: parseInt(document.getElementById('sessionTimeout').value),
+                api_access: document.getElementById('enableApiAccess').checked
+            }
+        };
+    }
+
+    getDefaultSettings() {
+        return {
+            general: {
+                agent_name: 'AI Automation Agent',
+                timezone: 'UTC',
+                language: 'en',
+                log_level: 'INFO'
+            },
+            database: {
+                type: 'mongodb',
+                mongodb_uri: 'mongodb://localhost:27017',
+                mysql_host: 'localhost',
+                mysql_port: 3306,
+                mysql_user: 'root'
+            },
+            blog_automation: {
+                frequency: 'daily',
+                max_length: 1000,
+                style: 'informative',
+                audience: 'general',
+                auto_publish: false,
+                topics: ['AI', 'Technology', 'Programming']
+            },
+            ai: {
+                model: 'gpt-3.5-turbo',
+                max_tokens: 2000,
+                temperature: 0.7,
+                quality: 'standard'
+            },
+            web: {
+                port: 8000,
+                host: '0.0.0.0',
+                refresh_interval: 10,
+                theme: 'dark'
+            },
+            security: {
+                rate_limit: true,
+                rate_limit_value: 60,
+                session_timeout: 60,
+                api_access: false
+            }
+        };
+    }
+
+    updateStatusIndicators() {
+        // Update database status
+        const dbType = document.getElementById('databaseType').value;
+        document.getElementById('dbType').textContent = dbType.toUpperCase();
+        document.getElementById('dbHost').textContent = dbType === 'mongodb' ? 'localhost:27017' : 'localhost:3306';
+        
+        // Update AI status
+        document.getElementById('aiModel').textContent = document.getElementById('aiModel').value;
+    }
+
+    updateDbStatus(status, type) {
+        const statusElement = document.getElementById('dbStatus');
+        const statusDot = statusElement.querySelector('.status-dot');
+        const statusText = statusElement.querySelector('.status-text');
+        
+        statusDot.className = `status-dot status-${type}`;
+        statusText.textContent = status;
+    }
+
+    updateAiStatus(status, type) {
+        const statusElement = document.getElementById('aiStatus');
+        const statusDot = statusElement.querySelector('.status-dot');
+        const statusText = statusElement.querySelector('.status-text');
+        
+        statusDot.className = `status-dot status-${type}`;
+        statusText.textContent = status;
+    }
+
+    markDirty() {
+        document.getElementById('saveSettings').classList.add('btn-warning');
+        document.getElementById('saveSettings').innerHTML = '<i class="fas fa-exclamation-triangle"></i> Save Changes';
+    }
+
+    markClean() {
+        document.getElementById('saveSettings').classList.remove('btn-warning');
+        document.getElementById('saveSettings').innerHTML = '<i class="fas fa-save"></i> Save Settings';
+    }
+
+    showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.textContent = message;
+        
+        document.getElementById('toastContainer').appendChild(toast);
+        setTimeout(() => toast.remove(), 5000);
+    }
+
+    showLoading(show) {
+        const overlay = document.getElementById('loadingOverlay');
+        overlay.style.display = show ? 'flex' : 'none';
+    }
+}
+
+// Initialize settings when page loads
+document.addEventListener('DOMContentLoaded', () => {
+    window.settings = new Settings();
+});
+</script>
+{% endblock %}

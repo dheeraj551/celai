@@ -1,0 +1,15 @@
+cd ~/ai-automation-agent/AI_Automation_Agent
+git pull origin main  # Try main branch first
+# If main doesn't work, try:
+# git pull origin master
+
+# Run the complete deployment script:
+curl -O https://raw.githubusercontent.com/dheeraj551/celai/main/fixed_deployment.sh
+chmod +x fixed_deployment.sh
+bash fixed_deployment.sh
+
+# Alternative manual deployment:
+# 1. Create the complete application file (blog_automation_app.py) - see the script content
+# 2. Install dependencies: pip3 install fastapi uvicorn websockets requests psutil loguru python-dotenv aiofiles
+# 3. Start the service: systemctl start ai-automation-agent
+# 4. Check status: systemctl status ai-automation-agent

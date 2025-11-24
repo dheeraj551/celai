@@ -1,0 +1,17 @@
+[Unit]
+Description=AI Automation Agent with Celorisdesigns.com Integration
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/root/ai-automation-agent/AI_Automation_Agent
+Environment=PYTHONPATH=/root/ai-automation-agent/AI_Automation_Agent
+ExecStart=/usr/bin/python3 -m uvicorn complete_blog_automation_app:app --host 0.0.0.0 --port 8000
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
